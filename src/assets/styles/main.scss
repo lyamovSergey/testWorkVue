@@ -74,7 +74,31 @@ body {
     display: flex;
     flex-direction: column;
     padding: 12px 15px 16px 15px;
+    border-bottom: 1px solid #dee3ea;
     p{
         padding-bottom: 13px;
     }
+}
+.filter__status{
+    padding: 12px 15px 20px 15px;
+    display: flex;
+    flex-direction: column;
+    p{
+        padding-bottom: 13px;
+    }
+    .status-btn{
+        margin-bottom: 13px;
+    }
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }

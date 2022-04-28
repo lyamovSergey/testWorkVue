@@ -1,28 +1,13 @@
 <template>
   <label>
     <input
+      type="radio"
       :value="value"
-      :checked="modelValue.includes(value)"
-      @change="(evt) => onChange(evt.target.value)"
-      type="checkbox"
+      @change="$emit('update:modelValue', $event.target.value)"
+      :checked="value === modelValue"
+      @click.stop
     />
-    <span v-if="minus">
-      <svg
-        width="8"
-        height="2"
-        viewBox="0 0 8 2"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
-          d="M0.149902 0.999902C0.149902 0.53046 0.53046 0.149902 0.999902 0.149902H6.9999C7.46934 0.149902 7.8499 0.53046 7.8499 0.999902C7.8499 1.46934 7.46934 1.8499 6.9999 1.8499H0.999902C0.53046 1.8499 0.149902 1.46934 0.149902 0.999902Z"
-          fill="white"
-        />
-      </svg>
-    </span>
-    <span v-else>
+    <span>
       <svg
         width="11"
         height="8"
@@ -36,39 +21,19 @@
         />
       </svg>
     </span>
-    <p v-if="slotPassed">
-      <slot></slot>
-    </p>
+    <p><slot></slot></p>
   </label>
 </template>
 <script>
 export default {
-  name: "checkbox-custom",
+  name: "radio-custom",
   props: {
     value: { type: String, default: null },
-    modelValue: { type: Array, default: () => [] },
-    minus: { type: Boolean, default: false },
-  },
-  methods: {
-    onChange(value) {
-      if (this.modelValue.includes(this.value)) {
-        this.$emit(
-          "update:modelValue",
-          this.modelValue.filter((cv) => cv !== value)
-        );
-      } else {
-        this.$emit("update:modelValue", this.modelValue.concat(value));
-      }
-    },
-  },
-  computed: {
-    slotPassed() {
-      
-      return !!this.$slots.default
-    },
+    modelValue: { type: String, default: null },
   },
 };
 </script>
+
 <style lang="scss" scoped>
 label {
   display: flex;
@@ -79,6 +44,7 @@ label {
     margin-bottom: 0;
     padding: 0;
     margin-left: 8px;
+    pointer-events: none;
   }
   &:hover {
     cursor: pointer;
@@ -87,12 +53,14 @@ label {
     position: absolute;
     z-index: -999999;
     opacity: 0;
+    visibility: hidden;
   }
   span {
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
+    pointer-events: none;
     svg {
       visibility: hidden;
       position: absolute;

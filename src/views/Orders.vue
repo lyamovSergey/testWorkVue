@@ -5,7 +5,7 @@
       <add-button>Добавить заказ</add-button>
       <label class="search">
         <img src="@/assets/img/svg/ic_search.svg" alt="" />
-        <input type="text" placeholder="Поиск" />
+        <input type="text" v-model="searchText" placeholder="Поиск" />
       </label>
     </div>
     <div class="content">
@@ -17,17 +17,18 @@
         <div class="filter__price">
           <p>Стоимость</p>
           <div class="input-block">
-            <input type="text" placeholder="От" />
-            <input type="text" placeholder="До" />
+            <input v-model="filterPriceFrom" type="number" min="0" placeholder="От" />
+            <input v-model="filterPriceTo" type="number" min="0" placeholder="До" />
           </div>
         </div>
         <div class="filter__time-delivery">
           <p>Время доставки</p>
-          <checkbox-custom
+          <!-- <checkbox-custom
             class="late-checkbox"
             v-model="filterDelivery.late"
             value="late"
             :minus="false"
+            @click.self="uncheckedButton($event)"
             >Опоздание
           </checkbox-custom>
           <checkbox-custom
@@ -35,26 +36,35 @@
             value="inTime"
             :minus="false"
             >Во время
-          </checkbox-custom>
+          </checkbox-custom> -->
         </div>
         <div class="filter__couriers">
           <p>Курьер</p>
-          <select-custom />
+          <select-custom 
+            :options="couriersList"
+            @selectedOption="selectedCourier($event)"
+          />
+        </div>
+        <div class="filter__status">
+          <p>Статус заказа</p>
+          <radio-custom @click="uncheckedButton($event)" class="status-btn" value="delivered" v-model="filterStatus">Доставлено</radio-custom>
+          <radio-custom @click="uncheckedButton($event)" class="status-btn" value="on_the_way" v-model="filterStatus">В пути</radio-custom>
+          <radio-custom @click="uncheckedButton($event)" value="prepare" v-model="filterStatus">Готовится</radio-custom>
         </div>
       </aside>
-      <orders-list
+      <orders-list-component
         :couriers="couriersList"
-        :orders="ordersList"
-      ></orders-list>
+        :orders="filteredorders"
+      ></orders-list-component>
     </div>
   </div>
 </template>
 
 <script>
-import OrdersList from "@/components/OrdersList.vue";
+import OrdersListComponent from "@/components/OrdersListComponent.vue";
 export default {
   components: {
-    OrdersList,
+    OrdersListComponent,
   },
   data: () => {
     return {
@@ -62,8 +72,14 @@ export default {
         inTime: [],
         late: [],
       },
+      
       couriersList: [],
-      ordersList: []
+      ordersList: [],
+      courierFilterId: 0,
+      filterStatus: '',
+      filterPriceFrom: '',
+      filterPriceTo: '',
+      searchText: ''
     };
   },
   methods: {
@@ -92,6 +108,42 @@ export default {
     getCourier(id) {
       return this.couriersList.find((courier) => courier.id == id).name;
     },
+    selectedCourier(e){
+      this.courierFilterId = e.id
+    },
+    test(){
+      this.filterStatus = '';
+    },
+    uncheckedButton(e){
+      if(e.target.getElementsByTagName('input')[0].value == this.filterStatus){
+        setTimeout(()=>{
+          this.filterStatus = '';
+        }, 0)
+      }
+    }
+  },
+  computed: {
+    filteredorders(){
+      return this.ordersList
+      .filter(order => {
+        return this.courierFilterId == 0 || order.courier_id == this.courierFilterId;
+      })
+      .filter(order => {
+        return this.filterStatus == "" || order.status == this.filterStatus
+      })
+      .filter(order => {
+        return this.filterPriceFrom == "" || order.amount >= this.filterPriceFrom
+      })
+      .filter(order => {
+        return this.filterPriceTo == "" || order.amount <= this.filterPriceTo
+      })
+      .filter(order => {
+        return this.searchText == "" 
+        || order.id.toString().indexOf(this.searchText) > -1 
+        || order.user.toString().toLowerCase().search(this.searchText.toLowerCase()) > -1
+        || order.courier_name.toString().toLowerCase().search(this.searchText.toLowerCase()) > -1
+      }) 
+    }
   },
   mounted(){
     this.getData()
