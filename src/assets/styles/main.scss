@@ -1,0 +1,80 @@
+@import "./css-reset.scss";
+
+* {
+    box-sizing: border-box;
+}
+body {
+    background: #e5e5e5;
+}
+.container {
+    width: 100%;
+    max-width: 1350px;
+    padding: 0 15px;
+    margin: 0 auto;
+}
+.filter {
+    width: 100%;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid #bdcbd6;
+    box-sizing: border-box;
+    border-radius: 4px;
+}
+.filter__heading {
+    padding: 0 15px;
+    height: 47px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #dee3ea;
+    p {
+        padding-left: 15px;
+    }
+}
+.filter__price {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid #dee3ea;
+    p {
+        padding-bottom: 13px;
+    }
+    .input-block {
+        width: 100%;
+        display: flex;
+        border: 1px solid #bdcbd6;
+        box-sizing: border-box;
+        border-radius: 4px;
+        overflow: hidden;
+        input {
+            max-width: 50%;
+            height: 32px;
+            border: none;
+            padding: 0 10px;
+            &:first-child{
+                border-right: 1px solid #bdcbd6;
+            }
+        }
+    }
+}
+.filter__time-delivery{
+    padding: 23px 15px 18px 15px;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid #dee3ea;
+    p{
+        padding-bottom: 13px;
+    }
+    .late-checkbox{
+        margin-bottom: 13px;
+    }
+}
+.filter__couriers{
+    display: flex;
+    flex-direction: column;
+    padding: 12px 15px 16px 15px;
+    p{
+        padding-bottom: 13px;
+    }
+}
