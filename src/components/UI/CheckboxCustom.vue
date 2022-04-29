@@ -63,8 +63,8 @@ export default {
     },
   },
   computed: {
+    // не выводить пустой slot
     slotPassed() {
-      
       return !!this.$slots.default
     },
   },

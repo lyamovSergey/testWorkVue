@@ -17,18 +17,28 @@
         <div class="filter__price">
           <p>Стоимость</p>
           <div class="input-block">
-            <input v-model="filterPriceFrom" type="number" min="0" placeholder="От" />
-            <input v-model="filterPriceTo" type="number" min="0" placeholder="До" />
+            <input
+              v-model="filterPriceFrom"
+              type="number"
+              min="0"
+              placeholder="От"
+            />
+            <input
+              v-model="filterPriceTo"
+              type="number"
+              min="0"
+              placeholder="До"
+            />
           </div>
         </div>
+        <!-- Не реализован start -->
         <div class="filter__time-delivery">
           <p>Время доставки</p>
-          <!-- <checkbox-custom
+          <checkbox-custom
             class="late-checkbox"
             v-model="filterDelivery.late"
             value="late"
             :minus="false"
-            @click.self="uncheckedButton($event)"
             >Опоздание
           </checkbox-custom>
           <checkbox-custom
@@ -36,20 +46,38 @@
             value="inTime"
             :minus="false"
             >Во время
-          </checkbox-custom> -->
+          </checkbox-custom>
         </div>
+        <!-- stop -->
         <div class="filter__couriers">
           <p>Курьер</p>
-          <select-custom 
+          <select-custom
             :options="couriersList"
             @selectedOption="selectedCourier($event)"
           />
         </div>
         <div class="filter__status">
           <p>Статус заказа</p>
-          <radio-custom @click="uncheckedButton($event)" class="status-btn" value="delivered" v-model="filterStatus">Доставлено</radio-custom>
-          <radio-custom @click="uncheckedButton($event)" class="status-btn" value="on_the_way" v-model="filterStatus">В пути</radio-custom>
-          <radio-custom @click="uncheckedButton($event)" value="prepare" v-model="filterStatus">Готовится</radio-custom>
+          <radio-custom
+            @click="uncheckedButton($event)"
+            class="status-btn"
+            value="delivered"
+            v-model="filterStatus"
+            >Доставлено</radio-custom
+          >
+          <radio-custom
+            @click="uncheckedButton($event)"
+            class="status-btn"
+            value="on_the_way"
+            v-model="filterStatus"
+            >В пути</radio-custom
+          >
+          <radio-custom
+            @click="uncheckedButton($event)"
+            value="prepare"
+            v-model="filterStatus"
+            >Готовится</radio-custom
+          >
         </div>
       </aside>
       <orders-list-component
@@ -58,6 +86,7 @@
         @showDeleButton="showButton($event)"
         @showDots="showDotsButton($event)"
         @deleteOrder="deleteOrderItem($event)"
+        @deleteGroupOrders="deleteGroupOrders($event)"
       ></orders-list-component>
     </div>
   </div>
@@ -75,14 +104,14 @@ export default {
         inTime: [],
         late: [],
       },
-      
+
       couriersList: [],
       ordersList: [],
       courierFilterId: 0,
-      filterStatus: '',
-      filterPriceFrom: '',
-      filterPriceTo: '',
-      searchText: ''
+      filterStatus: "",
+      filterPriceFrom: "",
+      filterPriceTo: "",
+      searchText: "",
     };
   },
   methods: {
@@ -109,57 +138,87 @@ export default {
             });
         });
     },
+    // имя курьера по id
     getCourier(id) {
       return this.couriersList.find((courier) => courier.id == id).name;
     },
-    selectedCourier(e){
-      this.courierFilterId = e.id
+    // фильтр курьеров
+    selectedCourier(e) {
+      this.courierFilterId = e.id;
     },
-    uncheckedButton(e){
-      if(e.target.getElementsByTagName('input')[0].value == this.filterStatus){
-        setTimeout(()=>{
-          this.filterStatus = '';
-        }, 0)
+    // убрать :checked у радио-кнопки
+    uncheckedButton(e) {
+      if (
+        e.target.getElementsByTagName("input")[0].value == this.filterStatus
+      ) {
+        setTimeout(() => {
+          this.filterStatus = "";
+        }, 0);
       }
     },
-    showButton(orderID){
-      this.ordersList.find(order => order.id == orderID).delBtn = true
+    // Показать кнопку удалить у заказа
+    showButton(orderID) {
+      this.ordersList.find((order) => order.id == orderID).delBtn = true;
     },
-    showDotsButton(orderID){
-      this.ordersList.find(order => order.id == orderID).delBtn = false
+    // Скрыть кнопку удалить у заказа
+    showDotsButton(orderID) {
+      this.ordersList.find((order) => order.id == orderID).delBtn = false;
     },
-    deleteOrderItem(orderID){
-      this.ordersList = this.ordersList.filter(order => {
-        return order.id != orderID
-      })
-    }
+    // Удалить один заказа
+    deleteOrderItem(orderID) {
+      this.ordersList = this.ordersList.filter((order) => {
+        return order.id != orderID;
+      });
+    },
+    // Удалить несколько заказов
+    deleteGroupOrders(selectedID) {
+      selectedID.forEach((id) => {
+        this.ordersList = this.ordersList.filter((order) => {
+          return order.id != id;
+        });
+      });
+    },
   },
   computed: {
-    filteredorders(){
+    // Фильтры
+    filteredorders() {
       return this.ordersList
-      .filter(order => {
-        return this.courierFilterId == 0 || order.courier_id == this.courierFilterId;
-      })
-      .filter(order => {
-        return this.filterStatus == "" || order.status == this.filterStatus
-      })
-      .filter(order => {
-        return this.filterPriceFrom == "" || order.amount >= this.filterPriceFrom
-      })
-      .filter(order => {
-        return this.filterPriceTo == "" || order.amount <= this.filterPriceTo
-      })
-      .filter(order => {
-        return this.searchText == "" 
-        || order.id.toString().indexOf(this.searchText) > -1 
-        || order.user.toString().toLowerCase().search(this.searchText.toLowerCase()) > -1
-        || order.courier_name.toString().toLowerCase().search(this.searchText.toLowerCase()) > -1
-      }) 
-    }
+        .filter((order) => {  //Фильтр по курьерам
+          return (
+            this.courierFilterId == 0 ||
+            order.courier_id == this.courierFilterId
+          );
+        })
+        .filter((order) => {  //Фильтр по статусам
+          return this.filterStatus == "" || order.status == this.filterStatus;
+        })
+        .filter((order) => {  //Фильтр цена от
+          return (
+            this.filterPriceFrom == "" || order.amount >= this.filterPriceFrom
+          );
+        })
+        .filter((order) => {  //Фильтр цена до
+          return this.filterPriceTo == "" || order.amount <= this.filterPriceTo;
+        })
+        .filter((order) => {  //Поиск по полям id, имя, курьер
+          return (
+            this.searchText == "" ||
+            order.id.toString().indexOf(this.searchText) > -1 ||
+            order.user
+              .toString()
+              .toLowerCase()
+              .search(this.searchText.toLowerCase()) > -1 ||
+            order.courier_name
+              .toString()
+              .toLowerCase()
+              .search(this.searchText.toLowerCase()) > -1
+          );
+        });
+    },
   },
-  mounted(){
-    this.getData()
-  }
+  mounted() {
+    this.getData();
+  },
 };
 </script>
 <style lang="scss" scoped>

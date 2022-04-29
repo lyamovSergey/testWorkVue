@@ -45,9 +45,9 @@
         v-for="order in orders"
         :key="order.id"
         :order="order"
-        @showDeleButton="$emit('showDeleButton', $event);"
-        @showDots="$emit('showDots', $event);"
-        @deleteOrder="$emit('deleteOrder', $event);"
+        @showDeleButton="$emit('showDeleButton', $event)"
+        @showDots="$emit('showDots', $event)"
+        @deleteOrder="$emit('deleteOrder', $event)"
       >
         <checkbox-custom
           v-model="selectedOrders"
@@ -56,15 +56,65 @@
           @click.stop="toggleCheckOrder($event, order.id)"
         />
       </OrderItem>
-      
     </tbody>
   </table>
   <p v-else class="empty-block">Пусто</p>
+  <transition name="toast">
+    <div class="toast-block" v-if="showToast">
+      <div class="container">
+        <div class="toast-block__text">
+          <p>Выбрано: </p>
+          <span>{{selectedOrders.length}}/</span>
+          <span>{{orders.length}}</span>
+        </div>
+        <div class="toast-block__buttons">
+          <custom-button @click="deleteSelected">
+            <template v-slot:svg>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  clip-rule="evenodd"
+                  d="M10.6364 4.36585C10.5073 4.36585 10.4091 4.46907 10.4091 4.58852V5.26399H13.5909V4.58852C13.5909 4.46907 13.4927 4.36585 13.3636 4.36585L10.6364 4.36585ZM14.9545 5.26399V4.58852C14.9545 3.70768 14.2387 3 13.3636 3L10.6364 3C9.76125 3 9.04545 3.70768 9.04545 4.58852V5.26399H5.18182C4.80526 5.26399 4.5 5.56975 4.5 5.94692C4.5 6.32409 4.80526 6.62984 5.18182 6.62984H6.31818V16.5059C6.31818 17.8869 7.441 19 8.81818 19H15.1818C16.559 19 17.6818 17.8869 17.6818 16.5059V6.62984H18.8182C19.1947 6.62984 19.5 6.32409 19.5 5.94692C19.5 5.56975 19.1947 5.26399 18.8182 5.26399H14.9545ZM7.68182 6.62984V16.5059C7.68182 17.1255 8.18706 17.6341 8.81818 17.6341H15.1818C15.8129 17.6341 16.3182 17.1255 16.3182 16.5059V6.62984H7.68182ZM10.6364 8.88637C11.0129 8.88637 11.3182 9.19213 11.3182 9.5693V14.5501C11.3182 14.9272 11.0129 15.233 10.6364 15.233C10.2598 15.233 9.95455 14.9272 9.95455 14.5501V9.5693C9.95455 9.19213 10.2598 8.88637 10.6364 8.88637ZM13.3636 8.88637C13.7402 8.88637 14.0455 9.19213 14.0455 9.5693V14.5501C14.0455 14.9272 13.7402 15.233 13.3636 15.233C12.9871 15.233 12.6818 14.9272 12.6818 14.5501V9.5693C12.6818 9.19213 12.9871 8.88637 13.3636 8.88637Z"
+                  fill="white"
+                />
+              </svg>
+            </template>
+            <template v-slot:text> Удалить </template>
+          </custom-button>
+          <div class="close-btn" @click="showToast = false">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M6.51375 7.57874C6.21612 7.28404 6.21612 6.80625 6.51375 6.51155C6.81138 6.21685 7.29392 6.21685 7.59155 6.51155L17.4863 16.2975C17.784 16.5922 17.784 17.07 17.4863 17.3647C17.1887 17.6594 16.7062 17.6594 16.4085 17.3647L6.51375 7.57874Z"
+                fill="#9AA3B0"
+              />
+              <path
+                d="M16.4086 6.63547C16.7063 6.34077 17.1888 6.34077 17.4864 6.63547C17.7841 6.93016 17.7841 7.40796 17.4864 7.70266L7.59165 17.4886C7.29402 17.7833 6.81148 17.7833 6.51385 17.4886C6.21622 17.1939 6.21622 16.7161 6.51385 16.4214L16.4086 6.63547Z"
+                fill="#9AA3B0"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </transition>
 </template>
 <script>
 import OrderItem from "@/components/OrderItem.vue";
 export default {
   name: "orders-list-component",
+  emits: ["showDeleButton", "deleteOrder", "showDots", "deleteGroupOrders"],
   components: { OrderItem },
   props: {
     couriers: {
@@ -115,9 +165,11 @@ export default {
       couriersNames: [],
       asc: true,
       activeIndex: null,
+      showToast: false,
     };
   },
   methods: {
+    // Сортировка
     sortOrders(key) {
       if (this.asc) {
         this.orders.sort((a, b) => {
@@ -143,23 +195,33 @@ export default {
         return;
       }
     },
-    toggleCheckOrder(event, id){
+    // test
+    toggleCheckOrder(event, id) {
       let inputInfo = {
         orderId: id,
-        checked: event.target.getElementsByTagName('input')[0].checked
-      }
+        checked: event.target.getElementsByTagName("input")[0].checked,
+      };
       // console.log('event', inputInfo)
-    }
+    },
+    // Удалить выбранные заказы
+    deleteSelected() {
+      this.$emit('deleteGroupOrders', this.selectedOrders);
+      this.selectedAll = [];
+      this.showToast = false
+    },
   },
 
   watch: {
+    // Переключатель "выделить все"
     selectedOrders() {
       if (this.selectedOrders.length != 0) {
+        this.showToast = true
         if (!this.selectedAll.includes("selectedAll")) {
           this.selectedAll.push("selectedAll");
         }
       } else {
         this.selectedAll = [];
+        this.showToast = false
       }
     },
   },
@@ -287,9 +349,65 @@ export default {
   text-align: center;
   padding-top: 100px;
 }
-.dots {
-  &:hover {
+.toast-block {
+  width: 100%;
+  height: 44px;
+  background-color: #fff;
+  position: fixed;
+  width: 100%;
+  left: 0;
+  bottom: 0;
+  box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.5);
+  .container {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: space-between;
+    .toast-block__text {
+      display: flex;
+      align-items: center;
+      p {
+        font-weight: 400;
+        font-size: 13px;
+        line-height: 15px;
+        color: #9aa3b0;
+        margin-right: 5px;
+      }
+      span {
+        font-weight: 400;
+        font-size: 13px;
+        line-height: 15px;
+        color: #f57c00;
+        
+      }
+    }
+  }
+}
+.toast-block__buttons{
+  display: flex;
+  align-items: center;
+}
+.close-btn{
+  display: flex;
+  align-items: center;
+  margin-left: 20px;
+  &:hover{
     cursor: pointer;
   }
+
+}
+
+.toast-move,
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.5s ease;
+}
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateY(30px);
+}
+.toast-leave-active {
+  position: fixed;
 }
 </style>

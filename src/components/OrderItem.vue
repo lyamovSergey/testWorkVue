@@ -61,6 +61,7 @@ export default {
   props: {
     order: { type: Object, default: () => {} },
   },
+  
   data: function () {
     return {};
   },
