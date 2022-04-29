@@ -55,6 +55,9 @@
       <orders-list-component
         :couriers="couriersList"
         :orders="filteredorders"
+        @showDeleButton="showButton($event)"
+        @showDots="showDotsButton($event)"
+        @deleteOrder="deleteOrderItem($event)"
       ></orders-list-component>
     </div>
   </div>
@@ -101,6 +104,7 @@ export default {
               //   Добавить имена курьеров
               this.ordersList.forEach((el) => {
                 el.courier_name = this.getCourier(el.courier_id);
+                el.delBtn = false;
               });
             });
         });
@@ -111,15 +115,23 @@ export default {
     selectedCourier(e){
       this.courierFilterId = e.id
     },
-    test(){
-      this.filterStatus = '';
-    },
     uncheckedButton(e){
       if(e.target.getElementsByTagName('input')[0].value == this.filterStatus){
         setTimeout(()=>{
           this.filterStatus = '';
         }, 0)
       }
+    },
+    showButton(orderID){
+      this.ordersList.find(order => order.id == orderID).delBtn = true
+    },
+    showDotsButton(orderID){
+      this.ordersList.find(order => order.id == orderID).delBtn = false
+    },
+    deleteOrderItem(orderID){
+      this.ordersList = this.ordersList.filter(order => {
+        return order.id != orderID
+      })
     }
   },
   computed: {

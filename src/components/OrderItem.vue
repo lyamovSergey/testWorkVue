@@ -18,31 +18,41 @@
       <span class="status status_prepare">Готовится</span>
     </td>
     <td class="dots">
-      <svg
-        v-if="!showDelBtn"
-        width="14"
-        height="4"
-        viewBox="0 0 14 4"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          d="M1.43994 0.560579C2.23523 0.560579 2.87994 1.20529 2.87994 2.00058C2.87994 2.79587 2.23523 3.44058 1.43994 3.44058C0.644649 3.44058 -6.10633e-05 2.79587 -6.10981e-05 2.00058C-6.11329e-05 1.20529 0.644649 0.560579 1.43994 0.560579Z"
-          fill="#9AA3B0"
-        />
-        <circle
-          cx="7"
-          cy="2.00046"
-          r="1.44"
-          transform="rotate(-90 7 2.00046)"
-          fill="#9AA3B0"
-        />
-        <path
-          d="M12.5601 0.560581C13.3553 0.560581 14.0001 1.20529 14.0001 2.00058C14.0001 2.79587 13.3553 3.44058 12.5601 3.44058C11.7648 3.44058 11.1201 2.79587 11.1201 2.00058C11.1201 1.20529 11.7648 0.560581 12.5601 0.560581Z"
-          fill="#9AA3B0"
-        />
-      </svg>
-      <div v-else class="del"></div>
+      <transition name="del-btn">
+        <div
+          class="dots"
+          v-if="!order.delBtn"
+          @click="$emit('showDeleButton', order.id)"
+        >
+          <svg
+            width="14"
+            height="4"
+            viewBox="0 0 14 4"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M1.43994 0.560579C2.23523 0.560579 2.87994 1.20529 2.87994 2.00058C2.87994 2.79587 2.23523 3.44058 1.43994 3.44058C0.644649 3.44058 -6.10633e-05 2.79587 -6.10981e-05 2.00058C-6.11329e-05 1.20529 0.644649 0.560579 1.43994 0.560579Z"
+              fill="#9AA3B0"
+            />
+            <circle
+              cx="7"
+              cy="2.00046"
+              r="1.44"
+              transform="rotate(-90 7 2.00046)"
+              fill="#9AA3B0"
+            />
+            <path
+              d="M12.5601 0.560581C13.3553 0.560581 14.0001 1.20529 14.0001 2.00058C14.0001 2.79587 13.3553 3.44058 12.5601 3.44058C11.7648 3.44058 11.1201 2.79587 11.1201 2.00058C11.1201 1.20529 11.7648 0.560581 12.5601 0.560581Z"
+              fill="#9AA3B0"
+            />
+          </svg>
+        </div>
+        <div v-else class="del">
+          <span @click="$emit('deleteOrder', order.id)">Удалить</span>
+          <span @click="$emit('showDots', order.id)">Отменить</span>
+        </div>
+      </transition>
     </td>
   </tr>
 </template>
@@ -52,9 +62,7 @@ export default {
     order: { type: Object, default: () => {} },
   },
   data: function () {
-    return {
-      showDelBtn: false,
-    };
+    return {};
   },
   methods: {
     // Отформатировать дату
@@ -189,8 +197,43 @@ th {
   }
 }
 .dots {
+  position: relative;
   &:hover {
     cursor: pointer;
   }
+  .del{
+    position: absolute;
+    right: 0;
+    padding: 5px 10px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid #f57c00;
+    box-shadow: 0px 0px 15px 1px rgba(0, 0, 0, 0.5);
+    span{
+      font-size: 12px;
+      &:first-child{
+        margin-right: 10px;
+        color: red;
+      }
+      &:last-child{
+        color: green;
+      }
+    }
+  }
+}
+
+
+.del-btn-move,
+.del-btn-enter-active,
+.del-btn-leave-active {
+  transition: all 0.5s ease;
+}
+.del-btn-enter-from,
+.del-btn-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+.del-btn-leave-active {
+  position: absolute;
 }
 </style>

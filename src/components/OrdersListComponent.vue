@@ -41,63 +41,22 @@
       </tr>
     </thead>
     <tbody>
-      <OrderItem v-for="order in orders" :key="order.id" :order="order">
+      <OrderItem
+        v-for="order in orders"
+        :key="order.id"
+        :order="order"
+        @showDeleButton="$emit('showDeleButton', $event);"
+        @showDots="$emit('showDots', $event);"
+        @deleteOrder="$emit('deleteOrder', $event);"
+      >
         <checkbox-custom
           v-model="selectedOrders"
           :value="order.id.toString()"
           :minus="false"
+          @click.stop="toggleCheckOrder($event, order.id)"
         />
       </OrderItem>
-      <!-- <tr v-for="order in orders" :key="order.id">
-        <td>
-          <checkbox-custom
-            v-model="selectedOrders"
-            :value="order.id.toString()"
-            :minus="false"
-          />
-        </td>
-        <td>#{{ order.id }}</td>
-        <td>{{ order.user }}</td>
-        <td>{{ getDateFormat(order.order_time) }}</td>
-        <td>{{ order.amount }} грн</td>
-        <td>{{ order.courier_name }}</td>
-        <td v-if="order.status == 'on_the_way'">
-          <span class="status status_on-the-way">В пути</span>
-        </td>
-        <td v-else-if="order.status == 'delivered'">
-          <span class="status status_delivered">Доставлено</span>
-        </td>
-        <td v-else-if="order.status == 'prepare'">
-          <span class="status status_prepare">Готовится</span>
-        </td>
-        <td class="dots">
-          <svg
-            v-if="!showDelBtn"
-            width="14"
-            height="4"
-            viewBox="0 0 14 4"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M1.43994 0.560579C2.23523 0.560579 2.87994 1.20529 2.87994 2.00058C2.87994 2.79587 2.23523 3.44058 1.43994 3.44058C0.644649 3.44058 -6.10633e-05 2.79587 -6.10981e-05 2.00058C-6.11329e-05 1.20529 0.644649 0.560579 1.43994 0.560579Z"
-              fill="#9AA3B0"
-            />
-            <circle
-              cx="7"
-              cy="2.00046"
-              r="1.44"
-              transform="rotate(-90 7 2.00046)"
-              fill="#9AA3B0"
-            />
-            <path
-              d="M12.5601 0.560581C13.3553 0.560581 14.0001 1.20529 14.0001 2.00058C14.0001 2.79587 13.3553 3.44058 12.5601 3.44058C11.7648 3.44058 11.1201 2.79587 11.1201 2.00058C11.1201 1.20529 11.7648 0.560581 12.5601 0.560581Z"
-              fill="#9AA3B0"
-            />
-          </svg>
-          <div v-else class="del"></div>
-        </td>
-      </tr> -->
+      
     </tbody>
   </table>
   <p v-else class="empty-block">Пусто</p>
@@ -184,6 +143,13 @@ export default {
         return;
       }
     },
+    toggleCheckOrder(event, id){
+      let inputInfo = {
+        orderId: id,
+        checked: event.target.getElementsByTagName('input')[0].checked
+      }
+      // console.log('event', inputInfo)
+    }
   },
 
   watch: {

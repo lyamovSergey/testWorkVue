@@ -4,6 +4,7 @@
       :value="value"
       :checked="modelValue.includes(value)"
       @change="(evt) => onChange(evt.target.value)"
+      @click.stop
       type="checkbox"
     />
     <span v-if="minus">
@@ -87,17 +88,20 @@ label {
     position: absolute;
     z-index: -999999;
     opacity: 0;
+    pointer-events: none;
   }
   span {
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
+    pointer-events: none;
     svg {
       visibility: hidden;
       position: absolute;
       border-radius: 4px;
       display: block;
+      pointer-events: none;
     }
     &:before {
       content: "";
@@ -106,6 +110,7 @@ label {
       height: 18px;
       border-radius: 4px;
       border: 1px solid #bdcbd6;
+      pointer-events: none;
     }
   }
   input:checked + span {
