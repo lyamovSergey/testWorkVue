@@ -19,6 +19,7 @@ button{
     border-radius: 4px;
     border: none;
     padding: 4px 24px;
+    min-height: 32px;
     p{
         margin: 0;
         padding: 0;

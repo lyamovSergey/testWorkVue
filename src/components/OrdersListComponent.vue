@@ -229,8 +229,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .orders-list {
-  flex-grow: 1;
-  margin-left: 24px;
+  
   border-collapse: collapse;
   tr {
     display: flex;

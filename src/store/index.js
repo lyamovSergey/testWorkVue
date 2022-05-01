@@ -7,11 +7,15 @@ export default createStore({
   mutations: {
   },
   actions: {
-    GET_ORDERS_LIST({commit}){
+    GET_ORDERS_LIST({commit}, data){
       return new Promise((resolve, reject) => {
         Axios({
           method: 'GET',
-          url: "http://134.209.119.20:8123/orders?limit=10",
+          url: "http://134.209.119.20:8123/orders",
+          params: {
+            limit: data.limit,
+            offset: data.offset
+          }
         }).then(resp => {
           resolve(resp)
         }).catch(err => {

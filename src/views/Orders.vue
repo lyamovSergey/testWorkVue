@@ -80,14 +80,21 @@
           >
         </div>
       </aside>
-      <orders-list-component
-        :couriers="couriersList"
-        :orders="filteredorders"
-        @showDeleButton="showButton($event)"
-        @showDots="showDotsButton($event)"
-        @deleteOrder="deleteOrderItem($event)"
-        @deleteGroupOrders="deleteGroupOrders($event)"
-      ></orders-list-component>
+      <div class="table-wrapper">
+        <orders-list-component
+          :couriers="couriersList"
+          :orders="filteredorders"
+          @showDeleButton="showButton($event)"
+          @showDots="showDotsButton($event)"
+          @deleteOrder="deleteOrderItem($event)"
+          @deleteGroupOrders="deleteGroupOrders($event)"
+        ></orders-list-component>
+        <div class="button-block" v-if="filteredorders.length != 0">
+          <custom-button @click="loadMore">
+            <template v-slot:text> Загрузить еще </template>
+          </custom-button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -112,31 +119,66 @@ export default {
       filterPriceFrom: "",
       filterPriceTo: "",
       searchText: "",
+      offset: 0,
+      limit: 10,
+      totalPages: 0,
     };
   },
   methods: {
-    getData() {
-      // Получить список курьеров
-      this.$store
-        .dispatch("GET_COURIERS_LIST")
-        .then((r) => {
-          this.couriersList = r.data.couriers;
-        })
-        .then((r) => {
-          // Получить список заказов
-          this.$store
-            .dispatch("GET_ORDERS_LIST")
-            .then((resp) => {
-              this.ordersList = resp.data.orders;
-            })
-            .then((resp) => {
-              //   Добавить имена курьеров
-              this.ordersList.forEach((el) => {
-                el.courier_name = this.getCourier(el.courier_id);
-                el.delBtn = false;
-              });
+    // Получить список заказов
+    getOrders() {
+      return new Promise((resolve, reject) => {
+        this.$store
+          .dispatch("GET_ORDERS_LIST", {
+            limit: this.limit,
+            offset: this.offset,
+          })
+          .then((response) => {
+            this.totalPages = Math.ceil(response.data.total_count / this.limit);
+
+            //   Добавить имена курьеров
+            let orders = response.data.orders;
+            orders.forEach((el) => {
+              el.courier_name = this.getCourier(el.courier_id);
+              el.delBtn = false;
             });
+            this.ordersList = orders;
+            resolve(response);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
+    },
+    // Получить слудующий список заказов
+    loadMore() {
+      this.$store
+        .dispatch("GET_ORDERS_LIST", {
+          limit: this.limit,
+          offset: (this.offset += this.limit),
+        })
+        .then((response) => {
+          let orders = response.data.orders;
+          orders.forEach((el) => {
+            el.courier_name = this.getCourier(el.courier_id);
+            el.delBtn = false;
+          });
+          this.ordersList = [...this.ordersList, ...orders];
         });
+    },
+    // Получить список курьеров
+    getCouriers() {
+      return new Promise((resolve, reject) => {
+        this.$store
+          .dispatch("GET_COURIERS_LIST")
+          .then((r) => {
+            this.couriersList = r.data.couriers;
+            resolve(r);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      });
     },
     // имя курьера по id
     getCourier(id) {
@@ -183,24 +225,29 @@ export default {
     // Фильтры
     filteredorders() {
       return this.ordersList
-        .filter((order) => {  //Фильтр по курьерам
+        .filter((order) => {
+          //Фильтр по курьерам
           return (
             this.courierFilterId == 0 ||
             order.courier_id == this.courierFilterId
           );
         })
-        .filter((order) => {  //Фильтр по статусам
+        .filter((order) => {
+          //Фильтр по статусам
           return this.filterStatus == "" || order.status == this.filterStatus;
         })
-        .filter((order) => {  //Фильтр цена от
+        .filter((order) => {
+          //Фильтр цена от
           return (
             this.filterPriceFrom == "" || order.amount >= this.filterPriceFrom
           );
         })
-        .filter((order) => {  //Фильтр цена до
+        .filter((order) => {
+          //Фильтр цена до
           return this.filterPriceTo == "" || order.amount <= this.filterPriceTo;
         })
-        .filter((order) => {  //Поиск по полям id, имя, курьер
+        .filter((order) => {
+          //Поиск по полям id, имя, курьер
           return (
             this.searchText == "" ||
             order.id.toString().indexOf(this.searchText) > -1 ||
@@ -217,7 +264,7 @@ export default {
     },
   },
   mounted() {
-    this.getData();
+    this.getCouriers().then(this.getOrders());
   },
 };
 </script>
@@ -267,5 +314,17 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+}
+.table-wrapper {
+  flex-direction: column;
+  display: flex;
+  flex-grow: 1;
+  margin-left: 24px;
+  .button-block {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 50px 0;
+  }
 }
 </style>
